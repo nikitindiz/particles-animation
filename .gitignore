@@ -5,3 +5,4 @@ node_modules
 .sass-cache
 *.sass-cache*
 style.scss~
+.idea/*

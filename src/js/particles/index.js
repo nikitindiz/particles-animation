@@ -2,6 +2,10 @@ var Particle;
 
 Particle = function(posx,posy,radius) {
 
+    if(radius < 0) {
+        throw "Ошибка! Дан радиус частицы "+radius+" пикселей, но радиус не может быть отрицательным!";
+    }
+
     this.position = {
         x: posx || 0,
         y: posy || 0
@@ -79,22 +83,9 @@ Particle.prototype.getPosition = function getPosition(movetime) {
         } else {
             this.spotlightTimeStamp = time;
         }
-        return true;
+        return this.position;
     } else {
         return false;
-    }
-};
-
-window.generateParticles = function(count, size, originX, originY) {
-
-    window.balls = window.balls || [];
-
-    for (var i = 0; i <= count; i++) {
-        var x = originX || Math.random() * window.innerWidth,
-            y = originY || Math.random() * window.innerHeight;
-        (function(particle){
-            window.balls.push(particle);
-        })(new Particle(x,y,size));
     }
 };
 
