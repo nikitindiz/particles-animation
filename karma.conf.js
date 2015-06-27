@@ -9,11 +9,11 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'sinon-chai', 'browserify'],
+    frameworks: [ 'jasmine', 'browserify' ],
 
     // list of files / patterns to load in the browser
     files: [
-      'src/javascript/**/__tests__/*'
+      'src/js/**/__tests__/*'
     ],
 
     // list of files to exclude
@@ -23,18 +23,19 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/javascript/**/__tests__/*': ['browserify']
+      'src/js/**/__tests__/*': ['browserify']
     },
 
     browserify: {
         debug: true,
-        extensions: ['.js', '.coffee', '.hbs']
+        extensions: ['.js']
     },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['nyan'],
+    // reporters: ['nyan'],
+    reporters: ["spec"],
 
     // web server port
     port: 9876,
