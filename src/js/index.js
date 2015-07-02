@@ -3,6 +3,7 @@ var Particle = require('./particles'),
     ctx = canvas.getContext('2d'),
     width = window.innerWidth,
     height = window.innerHeight,
+    piByPi = Math.PI*2,
 
     presetDefault = {
         count: 1000,
@@ -50,7 +51,20 @@ var Particle = require('./particles'),
         }
     },
 
-    settings = presetDefault;
+    presetInsaneRandomSizeFromCenter = {
+        count: 2000,
+        size: function() {
+            return Math.random() * 2 + 0.2;
+        },
+        minSpeed: 20,
+        maxSpeed: 100,
+        startOrigin: {
+            x: width/2,
+            y: height/2
+        }
+    },
+
+    settings = presetInsaneRandomSizeFromCenter;
 
 
 window.generateParticles = function(count, size, originX, originY) {
@@ -104,8 +118,8 @@ function renderCanvas() {
 
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fillStyle = 'rgba(0,0,0,0.1)';
-    ctx.fillRect(0,0,width,height);
 
+    ctx.fillRect(0,0,width,height);
 
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = "rgba(255,255,255,1)";
@@ -116,7 +130,7 @@ function renderCanvas() {
         for(var i = 0; i < window.particles.length; i++) {
             var ball = window.particles[i];
             ctx.beginPath();
-            ctx.arc(ball.position.x,ball.position.y,ball.radius,0,Math.PI*2,false);
+            ctx.arc(ball.position.x,ball.position.y,ball.radius,0,piByPi,false);
             ctx.closePath();
             ctx.fill();
         }
