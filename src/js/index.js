@@ -73,9 +73,8 @@ window.generateParticles = function(count, size, originX, originY) {
     while(count--) {
         var x = originX || Math.random() * window.innerWidth,
             y = originY || Math.random() * window.innerHeight;
-        (function(particle){
-            particles.push(particle);
-        })(new Particle(x,y,size));
+
+        particles.push(new Particle(x,y,size));
     }
 
 };
