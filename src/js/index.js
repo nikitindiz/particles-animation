@@ -126,13 +126,12 @@ function renderCanvas() {
 
 
     if(particles) {
-        for(var i = 0; i < particles.length; i++) {
-            var ball = particles[i];
-            ctx.beginPath();
-            ctx.arc(ball.position.x,ball.position.y,ball.radius,0,piByPi,false);
-            ctx.closePath();
-            ctx.fill();
+
+        var i = (particles || []).length;
+        while(i--) {
+            particles[i].draw(ctx);
         }
+
     }
 
 }
