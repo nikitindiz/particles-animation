@@ -1,3 +1,5 @@
+var piByPi = Math.PI*2;
+
 var Particle;
 
 Particle = function(posx,posy,radius) {
@@ -31,6 +33,8 @@ Particle.prototype.stop = function() {
     this.status = 'standing';
     this.spotlightTimeStamp = undefined;
     this.direction = this.position;
+
+    return this;
 };
 
 Particle.prototype.move = function(posx,posy,speed) {
@@ -55,9 +59,11 @@ Particle.prototype.move = function(posx,posy,speed) {
 
     this.speed = speed || 1;
 
+    return this;
+
 };
 
-Particle.prototype.getPosition = function getPosition(movetime) {
+Particle.prototype.getPosition = function(movetime) {
 
     var time = movetime / 1000;
 
@@ -87,6 +93,13 @@ Particle.prototype.getPosition = function getPosition(movetime) {
     } else {
         return false;
     }
+};
+
+Particle.prototype.draw = function(ctx) {
+    ctx.beginPath();
+    ctx.arc(this.position.x,this.position.y,this.radius,0,piByPi,false);
+    ctx.closePath();
+    ctx.fill();
 };
 
 module.exports = Particle;
