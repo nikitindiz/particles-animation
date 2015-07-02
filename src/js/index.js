@@ -4,6 +4,7 @@ var Particle = require('./particles'),
     width = window.innerWidth,
     height = window.innerHeight,
     piByPi = Math.PI*2,
+    particles = [],
 
     presetDefault = {
         count: 1000,
@@ -69,13 +70,11 @@ var Particle = require('./particles'),
 
 window.generateParticles = function(count, size, originX, originY) {
 
-    window.particles = window.particles || [];
-
     for (var i = 0; i <= count; i++) {
         var x = originX || Math.random() * window.innerWidth,
             y = originY || Math.random() * window.innerHeight;
         (function(particle){
-            window.particles.push(particle);
+            particles.push(particle);
         })(new Particle(x,y,size));
     }
 };
@@ -96,17 +95,17 @@ function resize() {
     width = window.innerWidth;
     height = window.innerHeight;
 
-    if (window.particles) {
+    if (particles) {
 
-        for(var i = 0 ; i < window.particles.length; i++) {
-            if(window.particles[i].position.x > width) {
-                window.particles[i].stop();
-                window.particles[i].position.x = width;
+        for(var i = 0 ; i < particles.length; i++) {
+            if(particles[i].position.x > width) {
+                particles[i].stop();
+                particles[i].position.x = width;
             }
 
-            if(window.particles[i].position.y > height) {
-                window.particles[i].stop();
-                window.particles[i].position.y = height;
+            if(particles[i].position.y > height) {
+                particles[i].stop();
+                particles[i].position.y = height;
             }
 
         }
@@ -126,9 +125,9 @@ function renderCanvas() {
 
 
 
-    if(window.particles) {
-        for(var i = 0; i < window.particles.length; i++) {
-            var ball = window.particles[i];
+    if(particles) {
+        for(var i = 0; i < particles.length; i++) {
+            var ball = particles[i];
             ctx.beginPath();
             ctx.arc(ball.position.x,ball.position.y,ball.radius,0,piByPi,false);
             ctx.closePath();
@@ -149,9 +148,9 @@ function animate(time) {
         canvas.height = height;
     }
 
-    if(window.particles) {
-        for(var i = 0; i < window.particles.length; i++) {
-            var ball = window.particles[i];
+    if(particles) {
+        for(var i = 0; i < particles.length; i++) {
+            var ball = particles[i];
             if(!ball.getPosition(time)) {
                 var x = Math.random() * width,
                     y = Math.random() * height,
