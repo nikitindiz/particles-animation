@@ -65,18 +65,19 @@ var Particle = require('./particles'),
         }
     },
 
-    settings = presetInsaneRandomSizeFromCenter;
+    settings = presetDefault;
 
 
 window.generateParticles = function(count, size, originX, originY) {
 
-    for (var i = 0; i <= count; i++) {
+    while(count--) {
         var x = originX || Math.random() * window.innerWidth,
             y = originY || Math.random() * window.innerHeight;
         (function(particle){
             particles.push(particle);
         })(new Particle(x,y,size));
     }
+
 };
 
 /* ======================= */
