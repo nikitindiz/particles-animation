@@ -30,6 +30,7 @@
       height = window.innerHeight,
 
       presetDefault = {
+        // count: 1000,
         count: 1000,
         size: Math.max(width, height) / 2000,
         minSpeed: 1,
@@ -94,7 +95,7 @@
 
       window.particles = window.particles || [];
 
-      for (var i = 0; i <= count; i++) {
+      for (var i = 0; i < count; i++) {
         var x = originX || Math.random() * window.innerWidth,
           y = originY || Math.random() * window.innerHeight;
         (function(particle) {
@@ -149,7 +150,7 @@
 
       ctx.fillRect(0, 0, width, height);  // rectangle over the entire screen
 
-      ctx.globalCompositeOperation = 'source-over';
+      // ctx.globalCompositeOperation = 'source-over';	// compositor operation for balls
       ctx.fillStyle = "rgba(255,255,255,1)"		// Color of the balls 
       // ctx.fillStyle = "rgba(4,18,47,0.1)";		// Color of the balls
 
@@ -181,10 +182,11 @@
         for (var i = 0; i < window.particles.length; i++) {
           var ball = window.particles[i];
           if (!ball.getPosition(time)) { // Time is the problem with why they all speed up
+          	// if ball not exists, make another
             var x = Math.random() * width,
               y = Math.random() * height,
               // speed = Math.random() * (settings.maxSpeed / 2) + settings.minSpeed;
-              speed = Math.random(0, Math.random()) * (settings.maxSpeed / 2) + settings.minSpeed;
+              speed = Math.random() * Math.random() * (settings.maxSpeed / 2) + settings.minSpeed;
             ball.move(x, y, speed);
           }
         }
@@ -228,6 +230,7 @@
     };
 
     Particle.prototype.stop = function() {
+      // alert("stop")
       this.status = 'standing';
       this.spotlightTimeStamp = undefined;
       this.direction = this.position;
@@ -238,7 +241,6 @@
       this.status = 'moving';
 
       this.spotlightTimeStamp = undefined;
-
       var deltaX = posx - this.position.x,
         deltaY = posy - this.position.y,
         distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -249,51 +251,81 @@
         distance: distance,
         sin: deltaY / distance,
         cos: deltaX / distance,
-        slope: Math.random(0.0, Math.PI * 2.0),
-        chosenSlope: Math.random(0.0, Math.PI * 2.0)
+        // this.direction.slope = Math.atan(this.direction.sin / this.direction.cos);
+        // slope: Math.random() * Math.PI * 2.0,
+        slope: Math.atan( deltaY / deltaX ),
+        chosenSlope: Math.random() * Math.PI * 2.0
       };
+
+      if (this.direction.slope < 0) {
+      	this.direction.slope += Math.PI * 2.0;
+      }
 
       this.startPoint = this.position;
 
       this.speed = speed || 1;
       // this.speed = speed;
+    };
 
+    Particle.prototype.turn = function turn(direction_gradient) {
+      // if you've reached chosen direction, choose another
+      if (Math.abs(this.direction.slope - this.direction.chosenSlope) < direction_gradient * 5) {
+      	this.direction.chosenSlope = Math.random() * Math.PI * 2.0;
+      }
+
+    	// turn towards chosen direction
+      if (this.direction.slope > this.direction.chosenSlope) {
+      	this.direction.slope = this.direction.slope - Math.random() * direction_gradient;
+      	// this.direction.slope = this.direction.slope - Math.random(0, Math.random()); // cool spirals
+      	this.direction.slope = Math.max(0.001, this.direction.slope);
+      } else {
+      	this.direction.slope = this.direction.slope + Math.random() * direction_gradient;
+      	// this.direction.slope = this.direction.slope + Math.random(0, Math.random());
+      	this.direction.slope = Math.min((Math.PI * 2.0) - 0.0001, this.direction.slope);
+      }
+
+      // something went wrong
+      if (this.direction.slope > Math.PI * 2.0 || this.direction.slope < 0.001) {
+      	alert("Direction is off" + this.direction.slope);
+      }
     };
 
     Particle.prototype.getPosition = function getPosition(movetime) {
 
-      var time = Math.min(movetime / 1000, 2);
+      var time = Math.min(movetime / 1000, 3);
+      // var time = movetime / 1000;
+      // var time = 30;
 
       if (this.status == 'moving') {
         if (this.spotlightTimeStamp) {
           var deltaTime = time - this.spotlightTimeStamp,
             distance = (deltaTime * this.speed),
-            // distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            // distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY),
         	direction_gradient = 0.01;
 
-          // this.direction.slope = Math.atan(this.direction.sin / this.direction.cos);
 
-          if (Math.abs(this.direction.slope - this.direction.chosenSlope) < direction_gradient * 5) {
-          	this.direction.chosenSlope = Math.random() * Math.PI * 2.0;
+          var slope = this.direction.slope;
+
+          this.turn(direction_gradient);
+
+          if (Math.abs(this.direction.slope - slope) > direction_gradient) {
+          	alert("error 2");
+          }
+          if (this.direction.slope == slope) {
+          	alert("error 3");
           }
 
-          if (this.direction.slope > this.direction.chosenSlope) {
-          	// alert("Greater than chosen");
-          	this.direction.slope = this.direction.slope - direction_gradient;
-          	this.direction.slope = Math.max(0.001, this.direction.slope);
-          } else {
-          	this.direction.slope = this.direction.slope + direction_gradient;
-          	this.direction.slope = Math.min((Math.PI * 2.0) - 0.0001, this.direction.slope);
-          }
-          // if (this.direction.slope > Math.PI * 2.0) {
-          // 	alert("Direction too big");
-          // }
-          this.direction.sin += (Math.sin(this.direction.slope) - this.direction.sin) / 100.0;
-          this.direction.cos += (Math.cos(this.direction.slope) - this.direction.cos) / 100.0;
 
+          // get x,y from radians
+          this.direction.sin = Math.sin(this.direction.slope);
+          this.direction.cos = Math.cos(this.direction.slope);
+          // this.direction.cos += (Math.cos(this.direction.slope) - this.direction.cos);
+
+          // scale x,y to distance
           var posy = this.direction.sin * distance,
             posx = this.direction.cos * distance;
 
+          // move
           this.position = {
             x: posx + this.startPoint.x,
             y: posy + this.startPoint.y
