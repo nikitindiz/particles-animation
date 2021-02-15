@@ -138,20 +138,27 @@
     }
 
     function renderCanvas() {
+      ctx.globalCompositeOperation = 'source-over';
+      // ctx.globalCompositeOperation = "xor";
 
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0,0,0,0.1)';
 
-      ctx.fillRect(0, 0, width, height);
+      // ctx.fillStyle = 'rgba(0,0,0,0.05)';
+
+      ctx.fillStyle = 'rgba(1,5,12,0.05)';  // this is how it gives it a tail: fills everything gradually this color
+      // lower alpha, longer tails
+
+      ctx.fillRect(0, 0, width, height);  // rectangle over the entire screen
 
       ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = "rgba(255,255,255,1)";
+      ctx.fillStyle = "rgba(255,255,255,1)"		// Color of the balls 
+      // ctx.fillStyle = "rgba(4,18,47,0.1)";		// Color of the balls
 
       if (window.particles) {
         for (var i = 0; i < window.particles.length; i++) {
           var ball = window.particles[i];
           ctx.beginPath();
           ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, Math.PI * 2, false);
+          // ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, Math.PI, false);
           ctx.closePath();
           ctx.fill();
         }
@@ -173,7 +180,7 @@
       if (window.particles) {
         for (var i = 0; i < window.particles.length; i++) {
           var ball = window.particles[i];
-          if (!ball.getPosition(time)) {
+          if (!ball.getPosition(time)) { // Time is the problem with why they all speed up
             var x = Math.random() * width,
               y = Math.random() * height,
               // speed = Math.random() * (settings.maxSpeed / 2) + settings.minSpeed;
@@ -241,24 +248,48 @@
         y: posy,
         distance: distance,
         sin: deltaY / distance,
-        cos: deltaX / distance
+        cos: deltaX / distance,
+        slope: Math.random(0.0, Math.PI * 2.0),
+        chosenSlope: Math.random(0.0, Math.PI * 2.0)
       };
 
       this.startPoint = this.position;
 
-      // this.speed = speed || 1;
-      this.speed = speed;
+      this.speed = speed || 1;
+      // this.speed = speed;
 
     };
 
     Particle.prototype.getPosition = function getPosition(movetime) {
 
-      var time = movetime / 1000;
+      var time = Math.min(movetime / 1000, 2);
 
       if (this.status == 'moving') {
         if (this.spotlightTimeStamp) {
           var deltaTime = time - this.spotlightTimeStamp,
-            distance = (deltaTime * this.speed);
+            distance = (deltaTime * this.speed),
+            // distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        	direction_gradient = 0.01;
+
+          // this.direction.slope = Math.atan(this.direction.sin / this.direction.cos);
+
+          if (Math.abs(this.direction.slope - this.direction.chosenSlope) < direction_gradient * 5) {
+          	this.direction.chosenSlope = Math.random() * Math.PI * 2.0;
+          }
+
+          if (this.direction.slope > this.direction.chosenSlope) {
+          	// alert("Greater than chosen");
+          	this.direction.slope = this.direction.slope - direction_gradient;
+          	this.direction.slope = Math.max(0.001, this.direction.slope);
+          } else {
+          	this.direction.slope = this.direction.slope + direction_gradient;
+          	this.direction.slope = Math.min((Math.PI * 2.0) - 0.0001, this.direction.slope);
+          }
+          // if (this.direction.slope > Math.PI * 2.0) {
+          // 	alert("Direction too big");
+          // }
+          this.direction.sin += (Math.sin(this.direction.slope) - this.direction.sin) / 100.0;
+          this.direction.cos += (Math.cos(this.direction.slope) - this.direction.cos) / 100.0;
 
           var posy = this.direction.sin * distance,
             posx = this.direction.cos * distance;
@@ -268,11 +299,11 @@
             y: posy + this.startPoint.y
           };
 
-          if (distance > this.direction.distance) {
-            this.status = 'standing';
-            this.spotlightTimeStamp = undefined;
-            this.position = this.direction;
-          }
+          // if (distance > this.direction.distance) {
+          //   this.status = 'standing';
+          //   this.spotlightTimeStamp = undefined;
+          //   this.position = this.direction;
+          // }
 
         } else {
           this.spotlightTimeStamp = time;

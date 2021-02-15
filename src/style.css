@@ -6,4 +6,6 @@ body, html {
   overflow: hidden; }
 
 canvas {
-  background-color: #04122f; }
+  /*background-color: #04122f; } /* rgb(4, 18, 47) */
+  /*background-color: rgb(200, 20, 200); }*/
+  background-color: rgb(4, 18, 17); }
