@@ -53,7 +53,7 @@
       },
 
       presetCentralExplode = {
-        count: 1000,
+        count: 10000,
         size: Math.max(width, height) / 2000,
         minSpeed: 1,
         maxSpeed: 100,
@@ -91,6 +91,7 @@
 
       // settings = presetDefault;
       settings = presetCentralExplode;
+      // settings = presetInsaneRandomSizeFromCenter;
 
     window.generateParticles = function(count, size, originX, originY) {
 
@@ -243,7 +244,7 @@
     Particle.prototype.stop = function() {
       // alert("stop")
       var randRad = Math.random() * Math.PI * 2.0,
-      	  scale = 10; // pixels
+      	  scale = 0; // pixels
       this.position = {
         x: this.startOrigin_x + Math.cos(randRad) * scale,
         y: this.startOrigin_y + Math.sin(randRad) * scale
@@ -324,11 +325,8 @@
 
       // var time = Math.min(movetime / 1000, 3);
       var time = movetime / 1000;
-      // var time = 30;
 
-      if (time > 100) {
-      	alert("Time ≥ 100");
-      }
+
       if (this.status == 'moving') {
         if (this.spotlightTimeStamp) {
           var deltaTime = time - this.spotlightTimeStamp,
@@ -357,12 +355,17 @@
             x: posx + this.startPoint.x,
             y: posy + this.startPoint.y
           };
+          
+          // if (distance > this.direction.distance) {
+          // if (distance > Math.min(window.innerWidth, window.innerHeight) / 2) {
+          // 	this.stop();
+          //   // this.status = 'standing';
+          //   // this.spotlightTimeStamp = undefined;
+          //   // this.position = this.direction;
+          // }
 
-          if (distance > this.direction.distance) {
-          	this.stop()
-            // this.status = 'standing';
-            // this.spotlightTimeStamp = undefined;
-            // this.position = this.direction;
+          if (this.position.x > window.innerWidth || this.position.x < 0 || this.position.y > window.innerHeight || this.position.y < 0) {
+          	this.stop();
           }
 
         } else {
