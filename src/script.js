@@ -43,7 +43,7 @@
 
       presetFast = {
         count: 1000,
-        size: 1,
+        size: Math.max(width, height) / 2000,
         minSpeed: 20,
         maxSpeed: 100,
         startOrigin: {
@@ -54,7 +54,7 @@
 
       presetCentralExplode = {
         count: 1000,
-        size: 1,
+        size: Math.max(width, height) / 2000,
         minSpeed: 1,
         maxSpeed: 100,
         startOrigin: {
@@ -89,7 +89,8 @@
         }
       },
 
-      settings = presetDefault;
+      // settings = presetDefault;
+      settings = presetCentralExplode;
 
     window.generateParticles = function(count, size, originX, originY) {
 
@@ -187,7 +188,14 @@
               y = Math.random() * height,
               // speed = Math.random() * (settings.maxSpeed / 2) + settings.minSpeed;
               speed = Math.random() * Math.random() * (settings.maxSpeed / 2) + settings.minSpeed;
-            ball.move(x, y, speed);
+
+
+            // var x = settings.startOrigin.x,
+          	 //  y = settings.startOrigin.y,
+          	 //  speed = Math.random() * Math.random() * (settings.maxSpeed / 2) + settings.minSpeed;
+          	
+
+          	ball.move(x, y, speed);
           }
         }
       }
@@ -206,6 +214,9 @@
       if (radius < 0) {
         throw "Error! Given the particle radius " + radius + " pixels, but the radius cannot be negative!";
       }
+
+      this.startOrigin_x = posx;
+      this.startOrigin_y = posy;
 
       this.position = {
         x: posx || 0,
@@ -231,6 +242,12 @@
 
     Particle.prototype.stop = function() {
       // alert("stop")
+      var randRad = Math.random() * Math.PI * 2.0,
+      	  scale = 10; // pixels
+      this.position = {
+        x: this.startOrigin_x + Math.cos(randRad) * scale,
+        y: this.startOrigin_y + Math.sin(randRad) * scale
+      };
       this.status = 'standing';
       this.spotlightTimeStamp = undefined;
       this.direction = this.position;
@@ -244,22 +261,28 @@
       var deltaX = posx - this.position.x,
         deltaY = posy - this.position.y,
         distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
+      this.slope = Math.atan( deltaY / deltaX );
+      if (deltaX < 0) {
+      	this.slope += Math.PI;
+      }
+      // alert(deltaX);
       this.direction = {
         x: posx,
         y: posy,
         distance: distance,
-        sin: deltaY / distance,
-        cos: deltaX / distance,
-        // this.direction.slope = Math.atan(this.direction.sin / this.direction.cos);
+        sin: Math.sin(this.slope),
+        cos: Math.cos(this.slope),
+        // this.slope = Math.atan(this.direction.sin / this.direction.cos);
         // slope: Math.random() * Math.PI * 2.0,
-        slope: Math.atan( deltaY / deltaX ),
         chosenSlope: Math.random() * Math.PI * 2.0
       };
 
-      if (this.direction.slope < 0) {
-      	this.direction.slope += Math.PI * 2.0;
-      }
+      if (Math.abs(this.slope + Math.PI * 2.0 - this.direction.chosenSlope) < Math.abs(this.slope - this.direction.chosenSlope)) {
+      		this.slope += Math.PI * 2.0
+      	}
+  	  if (Math.abs(this.slope - Math.PI * 2.0 - this.direction.chosenSlope) < Math.abs(this.slope - this.direction.chosenSlope)) {
+  		this.slope -= Math.PI * 2.0
+  	  }
 
       this.startPoint = this.position;
 
@@ -269,57 +292,61 @@
 
     Particle.prototype.turn = function turn(direction_gradient) {
       // if you've reached chosen direction, choose another
-      if (Math.abs(this.direction.slope - this.direction.chosenSlope) < direction_gradient * 5) {
-      	this.direction.chosenSlope = Math.random() * Math.PI * 2.0;
+      if (Math.abs(this.slope - this.direction.chosenSlope) < direction_gradient * 5) {
+      	// this.direction.chosenSlope = Math.random() * Math.PI * 2.0 - 0.0001;
+
+      	if (Math.abs(this.slope + Math.PI * 2.0 - this.direction.chosenSlope) < Math.abs(this.slope - this.direction.chosenSlope)) {
+      		this.slope += Math.PI * 2.0
+      	}
+      	if (Math.abs(this.slope - Math.PI * 2.0 - this.direction.chosenSlope) < Math.abs(this.slope - this.direction.chosenSlope)) {
+      		this.slope -= Math.PI * 2.0
+      	}
       }
 
     	// turn towards chosen direction
-      if (this.direction.slope > this.direction.chosenSlope) {
-      	this.direction.slope = this.direction.slope - Math.random() * direction_gradient;
-      	// this.direction.slope = this.direction.slope - Math.random(0, Math.random()); // cool spirals
-      	this.direction.slope = Math.max(0.001, this.direction.slope);
+      if (this.slope > this.direction.chosenSlope) {
+      	this.slope -= Math.random() * direction_gradient;
+      	// this.slope = this.slope - Math.random(0, Math.random()); // cool spirals
+      	this.slope = Math.max(0.001, this.slope);
       } else {
-      	this.direction.slope = this.direction.slope + Math.random() * direction_gradient;
-      	// this.direction.slope = this.direction.slope + Math.random(0, Math.random());
-      	this.direction.slope = Math.min((Math.PI * 2.0) - 0.0001, this.direction.slope);
+      	this.slope += Math.random() * direction_gradient;
+      	// this.slope = this.slope + Math.random(0, Math.random());
+      	// this.slope = Math.min((Math.PI * 2.0) - 0.0001, this.slope);
       }
 
       // something went wrong
-      if (this.direction.slope > Math.PI * 2.0 || this.direction.slope < 0.001) {
-      	alert("Direction is off" + this.direction.slope);
-      }
+      // if (this.slope > Math.PI * 2.0 || this.slope < 0.001) {
+      // 	alert("Direction is off" + this.slope);
+      // }
     };
 
     Particle.prototype.getPosition = function getPosition(movetime) {
 
-      var time = Math.min(movetime / 1000, 3);
-      // var time = movetime / 1000;
+      // var time = Math.min(movetime / 1000, 3);
+      var time = movetime / 1000;
       // var time = 30;
 
+      if (time > 100) {
+      	alert("Time ≥ 100");
+      }
       if (this.status == 'moving') {
         if (this.spotlightTimeStamp) {
           var deltaTime = time - this.spotlightTimeStamp,
             distance = (deltaTime * this.speed),
             // distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY),
-        	direction_gradient = 0.01;
+        	direction_gradient = 0.001,
+        	scale = 10;
 
 
-          var slope = this.direction.slope;
+          var slope = this.slope;
 
           this.turn(direction_gradient);
-
-          if (Math.abs(this.direction.slope - slope) > direction_gradient) {
-          	alert("error 2");
-          }
-          if (this.direction.slope == slope) {
-          	alert("error 3");
-          }
-
-
           // get x,y from radians
-          this.direction.sin = Math.sin(this.direction.slope);
-          this.direction.cos = Math.cos(this.direction.slope);
-          // this.direction.cos += (Math.cos(this.direction.slope) - this.direction.cos);
+          this.direction.sin = Math.sin(this.slope);
+          this.direction.cos = Math.cos(this.slope);
+
+
+          // // this.direction.cos += (Math.cos(this.slope) - this.direction.cos);
 
           // scale x,y to distance
           var posy = this.direction.sin * distance,
@@ -331,11 +358,12 @@
             y: posy + this.startPoint.y
           };
 
-          // if (distance > this.direction.distance) {
-          //   this.status = 'standing';
-          //   this.spotlightTimeStamp = undefined;
-          //   this.position = this.direction;
-          // }
+          if (distance > this.direction.distance) {
+          	this.stop()
+            // this.status = 'standing';
+            // this.spotlightTimeStamp = undefined;
+            // this.position = this.direction;
+          }
 
         } else {
           this.spotlightTimeStamp = time;
