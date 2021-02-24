@@ -204,17 +204,18 @@
       }
 
       renderCanvas();
-      if (time > 1000) {
-	      for (var x = 0; x < window.innerWidth; x++) {
-	      	for (var y = 0; y < window.innerHeight; y++) {
-	      		var data = ctx.getImageData(x, y, 1, 1).data;
-	      		// alert(data[1]);
-	      		if (data[3] / 255 < 0.052 && data[0] != 1) {
-	      			ctx.putImageData('rgba(1,4.5,11.75,0.05)', x, y);
-	      		}
-	      	}
-	      }
-  	  }
+      // Currently working on: replacing all old tails with this garbage
+     //  if (time > 1000) {
+	    //   for (var x = 0; x < window.innerWidth; x++) {
+	    //   	for (var y = 0; y < window.innerHeight; y++) {
+	    //   		var data = ctx.getImageData(x, y, 1, 1).data;
+	    //   		// alert(data[1]);
+	    //   		if (data[3] / 255 < 0.052 && data[0] != 1) {
+	    //   			ctx.putImageData('rgba(1,4.5,11.75,0.05)', x, y);
+	    //   		}
+	    //   	}
+	    //   }
+  	  // }
     }
 
   }, {
